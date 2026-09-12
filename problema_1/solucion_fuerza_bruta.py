@@ -73,24 +73,6 @@ def parsear_mochila(ruta_archivo):
 
 def fuerza_bruta(capacidad, items):
     """
-    Resuelve el problema de la mochila 0/1 por fuerza bruta pura,
-    generando y evaluando TODOS los subconjuntos posibles de elementos.
-
-    Idea del algoritmo:
-    Con n elementos existen 2^n subconjuntos posibles, ya que cada
-    elemento puede estar incluido (1) o no estar incluido (0) en un
-    subconjunto dado. Por lo tanto, cada subconjunto se puede representar
-    con un numero binario de n bits (una "mascara"), donde el bit i
-    indica si el elemento i forma parte de ese subconjunto o no.
-
-    Se recorren todas las mascaras posibles, de 0 a 2^n - 1, y para cada
-    una se arma el subconjunto de elementos correspondiente. No hay
-    ninguna poda: siempre se arma el subconjunto COMPLETO (se suman todos
-    sus pesos y beneficios) y recien al final se compara su peso contra
-    la capacidad para descartarlo o no. La busqueda nunca se corta antes
-    de tiempo, ni siquiera cuando ya es evidente que el subconjunto va a
-    superar la capacidad.
-
     Parametros:
         capacidad: capacidad maxima de la mochila (entero)
         items: lista de tuplas (peso, beneficio), una por elemento
@@ -108,10 +90,6 @@ def fuerza_bruta(capacidad, items):
     mejores_indices = []
     mejor_peso = 0
 
-    # Se recorren los 2^n subconjuntos posibles, representados como los
-    # numeros del 0 al 2^n - 1. La representacion binaria de cada numero
-    # indica que elementos forman parte de ese subconjunto (bit en 1 =
-    # el elemento esta incluido, bit en 0 = no esta incluido).
     for mascara in range(2 ** n):
         peso_subconjunto = 0
         beneficio_subconjunto = 0
@@ -127,11 +105,6 @@ def fuerza_bruta(capacidad, items):
                 beneficio_subconjunto += beneficio_i
                 indices_subconjunto.append(i)
 
-        # Recien aca, con el subconjunto ya armado por completo, se
-        # verifica si es valido (no supera la capacidad) y si mejora la
-        # mejor solucion encontrada hasta el momento. No hay poda: todos
-        # los subconjuntos se arman y evaluan enteros, incluso los que
-        # claramente van a superar la capacidad.
         if peso_subconjunto <= capacidad and beneficio_subconjunto > mejor_beneficio:
             mejor_beneficio = beneficio_subconjunto
             mejores_indices = indices_subconjunto
