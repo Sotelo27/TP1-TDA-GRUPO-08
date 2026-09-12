@@ -22,12 +22,6 @@ Se aplican dos podas:
      solucion ya encontrada, se corta toda la rama (ambas opciones: ni
      incluir ni excluir el elemento actual).
 
-Gracias a estas podas, backtracking recorre en la practica una fraccion
-mucho menor de los 2^n subconjuntos que la fuerza bruta (en el peor caso
-sigue siendo exponencial, pero el caso promedio mejora muchisimo), y sin
-embargo llega exactamente al mismo resultado optimo, porque nunca se
-descarta una rama que pudiera contener la solucion optima.
-
 Este script procesa los mismos archivos que solucion_fuerza_bruta.py
 (mochila10.txt ... mochila22.txt) y guarda los tiempos en un CSV aparte
 (tiempos_backtracking.csv) para poder comparar ambos enfoques.
@@ -38,8 +32,7 @@ import os
 import time
 
 # Archivos de mochila a procesar, en orden creciente de tamano. Se asume
-# que estan en la misma carpeta que este script, generados con
-# crear_mochila.py.
+# que estan en la subcarpeta casos/, generados con crear_mochila.py.
 ARCHIVOS_MOCHILA = [
     "mochila10.txt",
     "mochila13.txt",
@@ -48,9 +41,10 @@ ARCHIVOS_MOCHILA = [
     "mochila22.txt",
 ]
 
-# Carpeta donde vive este script: se usa como base tanto para buscar los
-# archivos de entrada como para guardar el CSV de salida.
+# Carpeta donde vive este script y subcarpeta donde estan los archivos de
+# entrada. El CSV de salida se sigue guardando junto al script.
 CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
+CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
 
 # Nombre del CSV donde se van a guardar los resultados (uno por archivo
 # procesado), para poder comparar despues contra tiempos_fuerza_bruta.csv.
@@ -108,11 +102,7 @@ def backtrack(i, peso_actual, beneficio_actual, indices_actuales, capacidad, ite
         mejor: diccionario {"beneficio", "indices", "peso"} con la mejor
             solucion encontrada hasta el momento (se va actualizando)
     """
-    # Caso base: ya se decidio (incluir o no) sobre los n elementos, asi
-    # que indices_actuales representa un subconjunto completo, igual que
-    # una mascara de bits completa en la version de fuerza bruta. Si es
-    # mejor que el mejor encontrado hasta ahora, se guarda como nueva
-    # mejor solucion.
+    # Caso base
     if i == len(items):
         if beneficio_actual > mejor["beneficio"]:
             mejor["beneficio"] = beneficio_actual
@@ -120,32 +110,14 @@ def backtrack(i, peso_actual, beneficio_actual, indices_actuales, capacidad, ite
             mejor["peso"] = peso_actual
         return
 
-    # --- PODA OPCIONAL: cota de beneficio (branch and bound) ---
-    # beneficio_restante[i] es la suma de los beneficios de TODOS los
-    # elementos que todavia no se visitaron (items[i:]), es decir, el
-    # mejor de los casos posibles: como si se pudieran llevar todos sin
-    # importar el peso que ocupen. Si ni sumando esa cota optimista al
-    # beneficio ya acumulado se supera la mejor solucion encontrada hasta
-    # el momento, no tiene sentido seguir explorando desde este nodo: se
-    # corta la rama completa (no se prueba ni incluir ni excluir el
-    # elemento actual). Esta poda es opcional en el sentido de que el
-    # algoritmo sigue siendo correcto sin ella (solo mas lento): si se
-    # quisiera sacar, alcanza con borrar este bloque.
+    # --- PODA OPCIONAL 
     cota_optimista = beneficio_actual + beneficio_restante[i]
     if cota_optimista <= mejor["beneficio"]:
         return
 
     peso_i, beneficio_i = items[i]
 
-    # --- Rama "incluir el elemento i" ---
-    # --- PODA OBLIGATORIA: factibilidad de peso ---
-    # Solo se explora esta rama si el elemento entra en la capacidad
-    # restante. Si incluirlo ya supera la capacidad, ni siquiera se llama
-    # a la recursion con esa opcion: esa rama entera del arbol (y todo lo
-    # que colgaria de ella) queda descartada de antemano, sin necesidad
-    # de terminar de decidir sobre el resto de los elementos para darse
-    # cuenta de que es invalida. Esta es la poda que distingue al
-    # backtracking de la fuerza bruta pura.
+    # --- PODA OBLIGATORIA
     if peso_actual + peso_i <= capacidad:
         indices_actuales.append(i)
         backtrack(i + 1, peso_actual + peso_i, beneficio_actual + beneficio_i, indices_actuales,
@@ -179,18 +151,10 @@ def mochila_backtracking(capacidad, items):
     """
     n = len(items)
 
-    # beneficio_restante[i] = suma de los beneficios de items[i], items[i+1],
-    # ..., items[n-1]. Se precalcula una sola vez, recorriendo la lista de
-    # atras para adelante, para poder consultar en O(1) "cuanto beneficio
-    # queda por delante" en cada nodo del arbol, en vez de tener que sumar
-    # la lista restante de items cada vez que se evalua la poda opcional.
     beneficio_restante = [0] * (n + 1)
     for i in range(n - 1, -1, -1):
         beneficio_restante[i] = beneficio_restante[i + 1] + items[i][1]
 
-    # Registro de la mejor solucion encontrada hasta el momento. Se usa un
-    # diccionario (en vez de variables globales sueltas) para que
-    # backtrack() lo pueda leer y modificar a medida que recorre el arbol.
     mejor = {"beneficio": 0, "indices": [], "peso": 0}
 
     backtrack(0, 0, 0, [], capacidad, items, beneficio_restante, mejor)
@@ -204,7 +168,7 @@ if __name__ == "__main__":
     filas_csv = []
 
     for nombre_archivo in ARCHIVOS_MOCHILA:
-        ruta_archivo = os.path.join(CARPETA_SCRIPT, nombre_archivo)
+        ruta_archivo = os.path.join(CARPETA_CASOS, nombre_archivo)
 
         if not os.path.isfile(ruta_archivo):
             print(f"No se encontró {nombre_archivo}, corré crear_mochila.py primero.")

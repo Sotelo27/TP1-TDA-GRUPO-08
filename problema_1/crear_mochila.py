@@ -1,7 +1,12 @@
+import os
 from random import randint
 
+CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
+CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
+
 def crear_mochila(n):
-    nombre="mochila"+str(n)+".txt"
+    os.makedirs(CARPETA_CASOS, exist_ok=True)
+    nombre=os.path.join(CARPETA_CASOS, "mochila"+str(n)+".txt")
     arch=open(nombre,"w")
     cap=n*50
     arch.write(str(cap)+"\n")

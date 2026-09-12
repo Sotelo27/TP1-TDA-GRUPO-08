@@ -26,8 +26,7 @@ import os
 import time
 
 # Archivos de mochila a procesar, en orden creciente de tamano. Se asume
-# que estan en la misma carpeta que este script, generados con
-# crear_mochila.py.
+# que estan en la subcarpeta casos/, generados con crear_mochila.py.
 ARCHIVOS_MOCHILA = [
     "mochila10.txt",
     "mochila13.txt",
@@ -36,9 +35,10 @@ ARCHIVOS_MOCHILA = [
     "mochila22.txt",
 ]
 
-# Carpeta donde vive este script: se usa como base tanto para buscar los
-# archivos de entrada como para guardar el CSV de salida.
+# Carpeta donde vive este script y subcarpeta donde estan los archivos de
+# entrada. El CSV de salida se sigue guardando junto al script.
 CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
+CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
 
 # Nombre del CSV donde se van a guardar los resultados (uno por archivo
 # procesado), para usarlo despues en el grafico de tiempos.
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     filas_csv = []
 
     for nombre_archivo in ARCHIVOS_MOCHILA:
-        ruta_archivo = os.path.join(CARPETA_SCRIPT, nombre_archivo)
+        ruta_archivo = os.path.join(CARPETA_CASOS, nombre_archivo)
 
         if not os.path.isfile(ruta_archivo):
             print(f"No se encontró {nombre_archivo}, corré crear_mochila.py primero.")
@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 "capacidad": capacidad,
                 "beneficio_maximo": beneficio_maximo,
                 "peso_usado": peso_total,
-                "tiempo_segundos": round(tiempo_ejecucion, 2),
+                "tiempo_segundos": round(tiempo_ejecucion, 6),
             }
         )
 
