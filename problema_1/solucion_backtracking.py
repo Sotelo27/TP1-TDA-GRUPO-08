@@ -87,12 +87,85 @@ def parsear_mochila(ruta_archivo):
     return capacidad, items
 
 
+def backtrack(i, peso_actual, beneficio_actual, indices_actuales, capacidad, items, beneficio_restante, mejor):
+    """
+    Decide que hacer con el elemento de indice i (incluirlo o no),
+    habiendo ya decidido que pasa con los elementos 0..i-1. Es la funcion
+    recursiva que recorre el arbol de decision de mochila_backtracking().
+
+    Parametros que cambian en cada llamada recursiva:
+        i: indice del elemento a decidir
+        peso_actual, beneficio_actual: peso y beneficio acumulados por las
+            decisiones tomadas hasta ahora (elementos 0..i-1)
+        indices_actuales: lista de indices incluidos hasta ahora
+
+    Parametros fijos durante toda la busqueda (se pasan tal cual en cada
+    llamada, no cambian):
+        capacidad: capacidad maxima de la mochila
+        items: lista completa de tuplas (peso, beneficio)
+        beneficio_restante: beneficio_restante[i] = suma de beneficios de
+            items[i:], precalculado en mochila_backtracking()
+        mejor: diccionario {"beneficio", "indices", "peso"} con la mejor
+            solucion encontrada hasta el momento (se va actualizando)
+    """
+    # Caso base: ya se decidio (incluir o no) sobre los n elementos, asi
+    # que indices_actuales representa un subconjunto completo, igual que
+    # una mascara de bits completa en la version de fuerza bruta. Si es
+    # mejor que el mejor encontrado hasta ahora, se guarda como nueva
+    # mejor solucion.
+    if i == len(items):
+        if beneficio_actual > mejor["beneficio"]:
+            mejor["beneficio"] = beneficio_actual
+            mejor["indices"] = list(indices_actuales)
+            mejor["peso"] = peso_actual
+        return
+
+    # --- PODA OPCIONAL: cota de beneficio (branch and bound) ---
+    # beneficio_restante[i] es la suma de los beneficios de TODOS los
+    # elementos que todavia no se visitaron (items[i:]), es decir, el
+    # mejor de los casos posibles: como si se pudieran llevar todos sin
+    # importar el peso que ocupen. Si ni sumando esa cota optimista al
+    # beneficio ya acumulado se supera la mejor solucion encontrada hasta
+    # el momento, no tiene sentido seguir explorando desde este nodo: se
+    # corta la rama completa (no se prueba ni incluir ni excluir el
+    # elemento actual). Esta poda es opcional en el sentido de que el
+    # algoritmo sigue siendo correcto sin ella (solo mas lento): si se
+    # quisiera sacar, alcanza con borrar este bloque.
+    cota_optimista = beneficio_actual + beneficio_restante[i]
+    if cota_optimista <= mejor["beneficio"]:
+        return
+
+    peso_i, beneficio_i = items[i]
+
+    # --- Rama "incluir el elemento i" ---
+    # --- PODA OBLIGATORIA: factibilidad de peso ---
+    # Solo se explora esta rama si el elemento entra en la capacidad
+    # restante. Si incluirlo ya supera la capacidad, ni siquiera se llama
+    # a la recursion con esa opcion: esa rama entera del arbol (y todo lo
+    # que colgaria de ella) queda descartada de antemano, sin necesidad
+    # de terminar de decidir sobre el resto de los elementos para darse
+    # cuenta de que es invalida. Esta es la poda que distingue al
+    # backtracking de la fuerza bruta pura.
+    if peso_actual + peso_i <= capacidad:
+        indices_actuales.append(i)
+        backtrack(i + 1, peso_actual + peso_i, beneficio_actual + beneficio_i, indices_actuales,
+                  capacidad, items, beneficio_restante, mejor)
+        indices_actuales.pop()  # se deshace la decision (el "backtrack" propiamente dicho)
+
+    # --- Rama "no incluir el elemento i" ---
+    # Esta rama siempre es factible (no agrega peso), asi que siempre se
+    # explora.
+    backtrack(i + 1, peso_actual, beneficio_actual, indices_actuales,
+              capacidad, items, beneficio_restante, mejor)
+
+
 def mochila_backtracking(capacidad, items):
     """
     Resuelve el problema de la mochila 0/1 con backtracking, recorriendo
     el arbol de decision "incluir / no incluir" elemento por elemento (en
     orden de indice), pero podando las ramas que no pueden llevar a una
-    solucion mejor que la ya encontrada.
+    solucion mejor que la ya encontrada. El recorrido en si lo hace la
+    funcion backtrack() de arriba.
 
     Parametros:
         capacidad: capacidad maxima de la mochila (entero)
@@ -116,69 +189,11 @@ def mochila_backtracking(capacidad, items):
         beneficio_restante[i] = beneficio_restante[i + 1] + items[i][1]
 
     # Registro de la mejor solucion encontrada hasta el momento. Se usa un
-    # diccionario (en vez de variables globales sueltas) para que la
-    # funcion recursiva interna pueda leerlo y modificarlo sin necesidad
-    # de declarar "nonlocal" por cada campo.
+    # diccionario (en vez de variables globales sueltas) para que
+    # backtrack() lo pueda leer y modificar a medida que recorre el arbol.
     mejor = {"beneficio": 0, "indices": [], "peso": 0}
 
-    def backtrack(i, peso_actual, beneficio_actual, indices_actuales):
-        """
-        Decide que hacer con el elemento de indice i (incluirlo o no),
-        habiendo ya decidido que pasa con los elementos 0..i-1.
-
-        peso_actual y beneficio_actual son el peso y beneficio acumulados
-        por las decisiones tomadas hasta ahora (elementos 0..i-1).
-        indices_actuales es la lista de indices incluidos hasta ahora.
-        """
-        # Caso base: ya se decidio (incluir o no) sobre los n elementos,
-        # asi que indices_actuales representa un subconjunto completo,
-        # igual que una mascara de bits completa en la version de fuerza
-        # bruta. Si es mejor que el mejor encontrado hasta ahora, se
-        # guarda como nueva mejor solucion.
-        if i == n:
-            if beneficio_actual > mejor["beneficio"]:
-                mejor["beneficio"] = beneficio_actual
-                mejor["indices"] = list(indices_actuales)
-                mejor["peso"] = peso_actual
-            return
-
-        # --- PODA OPCIONAL: cota de beneficio (branch and bound) ---
-        # beneficio_restante[i] es la suma de los beneficios de TODOS los
-        # elementos que todavia no se visitaron (items[i:]), es decir, el
-        # mejor de los casos posibles: como si se pudieran llevar todos
-        # sin importar el peso que ocupen. Si ni sumando esa cota optimista
-        # al beneficio ya acumulado se supera la mejor solucion encontrada
-        # hasta el momento, no tiene sentido seguir explorando desde este
-        # nodo: se corta la rama completa (no se prueba ni incluir ni
-        # excluir el elemento actual). Esta poda es opcional en el sentido
-        # de que el algoritmo sigue siendo correcto sin ella (solo mas
-        # lento): si se quisiera sacar, alcanza con borrar este bloque.
-        cota_optimista = beneficio_actual + beneficio_restante[i]
-        if cota_optimista <= mejor["beneficio"]:
-            return
-
-        peso_i, beneficio_i = items[i]
-
-        # --- Rama "incluir el elemento i" ---
-        # --- PODA OBLIGATORIA: factibilidad de peso ---
-        # Solo se explora esta rama si el elemento entra en la capacidad
-        # restante. Si incluirlo ya supera la capacidad, ni siquiera se
-        # llama a la recursion con esa opcion: esa rama entera del arbol
-        # (y todo lo que colgaria de ella) queda descartada de antemano,
-        # sin necesidad de terminar de decidir sobre el resto de los
-        # elementos para darse cuenta de que es invalida. Esta es la poda
-        # que distingue al backtracking de la fuerza bruta pura.
-        if peso_actual + peso_i <= capacidad:
-            indices_actuales.append(i)
-            backtrack(i + 1, peso_actual + peso_i, beneficio_actual + beneficio_i, indices_actuales)
-            indices_actuales.pop()  # se deshace la decision (el "backtrack" propiamente dicho)
-
-        # --- Rama "no incluir el elemento i" ---
-        # Esta rama siempre es factible (no agrega peso), asi que siempre
-        # se explora.
-        backtrack(i + 1, peso_actual, beneficio_actual, indices_actuales)
-
-    backtrack(0, 0, 0, [])
+    backtrack(0, 0, 0, [], capacidad, items, beneficio_restante, mejor)
 
     return mejor["beneficio"], mejor["indices"], mejor["peso"]
 
