@@ -28,9 +28,9 @@ Además, para obtener una **garantía de calidad de 1/2**, se compara la soluci�
 Los archivos deben ejecutarse en el siguiente orden:
 
 ```text
-1. python crear_mochila.py
-2. python solucionG.py
-3. python graficos.py
+1. py crear_mochila.py
+2. py solucionG.py
+3. py graficoG.py
 ```
 ---
 
@@ -197,7 +197,7 @@ Desde la carpeta `problema_2`, ejecutar:
 ```bash
 py crear_mochila.py
 py solucionG.py
-py graficos.py
+py graficoG.py
 ```
 
 El flujo completo es:
@@ -213,7 +213,7 @@ ejecuta Greedy y mide tiempos
         ↓
 tiemposG.csv
         ↓
-graficos.py
+graficoG.py
         ↓
 gráficos en graficos/
 ```
