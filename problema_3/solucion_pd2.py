@@ -9,8 +9,7 @@ donde dp[i][b] = peso minimo necesario para lograr exactamente un
 beneficio b, usando unicamente los primeros i elementos (beneficio_total
 es la suma de los beneficios de todos los elementos, el mayor beneficio
 que tendria sentido pedir). Se completa fila por fila, igual que en el
-planteo tradicional, pero invirtiendo los roles de peso y beneficio en la
-recurrencia.
+planteo tradicional, pero invirtiendo los roles de peso y beneficio en la recurrencia.
 """
 
 import csv
@@ -40,7 +39,6 @@ RUTA_CSV_SALIDA = os.path.join(CARPETA_SCRIPT, NOMBRE_CSV_SALIDA)
 # Se usa infinito para marcar un beneficio inalcanzable.
 INFINITO = float("inf")
 
-
 def parsear_mochila(ruta_archivo):
     """
     Lee un archivo de mochila con el siguiente formato:
@@ -65,7 +63,6 @@ def parsear_mochila(ruta_archivo):
 
     return capacidad, items
 
-
 def reconstruir_solucion(dp, items, mejor_beneficio):
     """
     Recorre la tabla dp "hacia atras" para reconstruir que elementos se usaron para lograr mejor_beneficio: 
@@ -87,7 +84,6 @@ def reconstruir_solucion(dp, items, mejor_beneficio):
 
     elegidos.reverse()
     return elegidos
-
 
 def mochila_dp_minimizar_peso(capacidad, items):
 
@@ -149,6 +145,8 @@ if __name__ == "__main__":
             f"n={n} | capacidad={capacidad} | beneficio_maximo={beneficio_maximo} "
             f"| peso_usado={peso_total} | tiempo={tiempo_ejecucion:.6f} s"
         )
+        # DESCOMENTAR SI SE QUIERE VER LOS ELEMENTOS ELEGIDOS
+        # print(f"  Elementos elegidos: {indices_elegidos}")
 
         filas_csv.append(
             {

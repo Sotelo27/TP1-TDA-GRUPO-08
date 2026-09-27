@@ -35,7 +35,6 @@ CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
 NOMBRE_CSV_SALIDA = "tiempos_pd_tradicional.csv"
 RUTA_CSV_SALIDA = os.path.join(CARPETA_SCRIPT, NOMBRE_CSV_SALIDA)
 
-
 def parsear_mochila(ruta_archivo):
     """
     Lee un archivo de mochila con el siguiente formato:
@@ -60,7 +59,6 @@ def parsear_mochila(ruta_archivo):
 
     return capacidad, items
 
-
 def reconstruir_solucion(dp, items, capacidad):
     """
     Recorre la tabla dp "hacia atras" para reconstruir que elementos se usaron en la solucion optima: 
@@ -82,7 +80,6 @@ def reconstruir_solucion(dp, items, capacidad):
 
     elegidos.reverse()
     return elegidos
-
 
 def mochila_dp_maximizar_beneficio(capacidad, items):
     
@@ -135,6 +132,8 @@ if __name__ == "__main__":
             f"n={n} | capacidad={capacidad} | beneficio_maximo={beneficio_maximo} "
             f"| peso_usado={peso_total} | tiempo={tiempo_ejecucion:.6f} s"
         )
+        # DESCOMENTAR SI SE QUIERE VER LOS ELEMENTOS ELEGIDOS
+        # print(f"  Elementos elegidos: {indices_elegidos}")
 
         filas_csv.append(
             {
