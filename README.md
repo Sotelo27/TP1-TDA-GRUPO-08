@@ -38,9 +38,13 @@ Dos algoritmos de **Programación Dinámica** para el problema de la mochila:
 ---
 
 ### Problema 4 – Programación Lineal
-Algoritmo que resuelve el problema de la mochila mediante **Programación Lineal**, utilizando la biblioteca **PuLP**.
+Algoritmo que resuelve el problema de la mochila 0/1 mediante **Programación Lineal Entera**, utilizando la biblioteca **PuLP** (con el solver CBC, incluido en la biblioteca).
+- `crear_mochila.py` genera los sets de datos en `casos/` (n = 1000, 2000, 5000, 10000 y 20000 elementos).
+- `solucion.py` arma el modelo (variables binarias Yi, función objetivo y restricción de capacidad), lo resuelve con PuLP y guarda los resultados y tiempos en `tiempos_pulp.csv`.
+- `graficos.py` genera el gráfico de tiempos medidos vs. curva teórica de ajuste en `graficos/grafico_pulp.png`.
 - Cálculo del orden de complejidad temporal del algoritmo desarrollado.
-- `graficos.py` genera los gráficos comparativos de tiempos de ejecución teórica y real.
+- Incluye las instrucciones de ejecución en el `README.md` interno.
+- **Requiere PuLP 3.x** (`pip install "pulp<4"`): la versión 4.0 cambió la forma de crear variables y no es compatible con el código.
 
 ---
 
@@ -72,6 +76,11 @@ Cada carpeta de problema contiene un archivo `README.md` con instrucciones detal
   - `numpy`
   - `pulp`
   - `pytest`
+
+Instalación de todas las bibliotecas:
+
+    pip install "pulp<4" numpy matplotlib pytest
+
 
 ## Informe
 
