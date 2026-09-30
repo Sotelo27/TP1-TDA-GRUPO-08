@@ -42,7 +42,6 @@ Algoritmo que resuelve el problema de la mochila 0/1 mediante **Programación Li
 - `crear_mochila.py` genera los sets de datos en `casos/` (n = 1000, 2000, 5000, 10000 y 20000 elementos).
 - `solucion.py` arma el modelo (variables binarias Yi, función objetivo y restricción de capacidad), lo resuelve con PuLP y guarda los resultados y tiempos en `tiempos_pulp.csv`.
 - `graficos.py` genera el gráfico de tiempos medidos vs. curva teórica de ajuste en `graficos/grafico_pulp.png`.
-- Cálculo del orden de complejidad temporal del algoritmo desarrollado.
 - Incluye las instrucciones de ejecución en el `README.md` interno.
 - **Requiere PuLP 3.x** (`pip install "pulp<4"`): la versión 4.0 cambió la forma de crear variables y no es compatible con el código.
 
