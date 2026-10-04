@@ -165,11 +165,7 @@ $$
 Entonces:
 
 $$
-\frac{G}{OPT}
-=
-\frac{52}{100}
-=
-0,52
+\frac{G}{OPT} = \frac{52}{100} = 0,52
 $$
 
 Por lo tanto, en este caso la solución obtenida por Greedy representa el:
