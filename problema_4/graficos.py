@@ -1,11 +1,3 @@
-"""
-Problema 4 - Graficos de tiempos de la Programacion Lineal (PuLP)
-Teoria de Algoritmos - TP1
-
-Lee tiempos_pulp.csv (generado por solucion_pulp.py) y guarda en graficos/:
-  - grafico_pulp.png -> tiempo medido vs. curva de ajuste (minimos cuadrados)
-"""
-
 import csv
 import os
 
@@ -27,7 +19,6 @@ if __name__ == "__main__":
     os.makedirs(CARPETA_GRAFICOS, exist_ok=True)
     n, tiempos = leer_tiempos()
 
-    # Tiempo medido vs. curva de ajuste c * n * log2(n), con c ajustada por minimos cuadrados.
     A = (n * np.log2(n))[:, None]
     c = np.linalg.lstsq(A, tiempos, rcond=None)[0][0]
     xs = np.linspace(n.min(), n.max(), 400)

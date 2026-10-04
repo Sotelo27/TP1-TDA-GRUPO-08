@@ -89,14 +89,14 @@ def mochila_pulp(capacidad, items):
     return mejor_beneficio, mejores_indices, mejor_peso
 
 if __name__ == "__main__":
-    # Filas que se van a escribir en el CSV de salida, una por cada
-    # archivo procesado con exito.
+
     filas_csv = []
 
-    # Calentamiento: la primera vez que se usa PuLP, el sistema tiene que cargar
-    # el solver CBC desde el disco, y eso tarda bastante mas que una resolucion
-    # normal. Se resuelve una mochila chica SIN medir el tiempo, para que ese
-    # costo no quede sumado a la primera mochila medida.
+    # Calentamiento: la primera resolución con PuLP es más lenta que las demás
+    # porque el sistema todavía no tiene en memoria el ejecutable del solver CBC
+    # (y PuLP termina de inicializarse). Se resuelve una mochila chica SIN medir
+    # el tiempo, para que ese costo de "arranque en frío" no se sume a la
+    # primera mochila medida.
     mochila_pulp(50, [(10, 60), (20, 100), (30, 120)])
 
     for nombre_archivo in ARCHIVOS_MOCHILA:
@@ -106,9 +106,7 @@ if __name__ == "__main__":
             print(f"No se encontró {nombre_archivo}, corré crear_mochila.py primero.")
             continue
 
-        # La lectura y el parseo del archivo NO se incluyen en la
-        # medicion de tiempo: solo interesa medir el tiempo que tarda en
-        # armarse y resolverse el modelo de programacion lineal.
+
         capacidad, items = parsear_mochila(ruta_archivo)
         n = len(items)
 
@@ -122,8 +120,7 @@ if __name__ == "__main__":
             f"n={n} | capacidad={capacidad} | beneficio_maximo={beneficio_maximo} "
             f"| peso_usado={peso_total} | tiempo={tiempo_ejecucion:.6f} s"
         )
-        # DESCOMENTAR SI SE QUIERE VER LOS ELEMENTOS ELEGIDOS
-        # print(f"  Elementos elegidos: {indices_elegidos}")
+
 
         filas_csv.append(
             {
