@@ -13,7 +13,8 @@ El trabajo aborda el **problema de la mochila (Knapsack Problem)** resuelto medi
 ### Problema 1 – Fuerza Bruta vs. Backtracking
 Implementación del problema de la mochila mediante **fuerza bruta**, y luego mediante **backtracking** para llegar al mismo resultado en menos tiempo.
 - Contiene el código fuente y los tests asociados de ambas variantes.
-- Cálculo del orden de complejidad temporal de ambos algoritmos.
+- `generar_casos.py` genera los sets de datos en `casos/` (n = 10 a 22) usando `crear_mochila.py`, que se deja sin modificar.
+- Cálculo del orden de complejidad temporal de ambos algoritmos. Cada caso se mide 5 veces y se guarda el promedio.
 - `graficos.py` compara la curva de tiempos de ejecución teórica y real de ambos algoritmos.
 - Incluye las instrucciones de ejecución en el `README.md` interno.
 

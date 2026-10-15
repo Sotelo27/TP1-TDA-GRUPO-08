@@ -30,7 +30,7 @@ Ambos enfoques llegan exactamente al mismo resultado óptimo; lo que cambia es e
 Los scripts tienen dependencias entre sí, así que hay que correrlos en este orden:
 
 ```
-1. python generar_casos.py          # genera mochila10.txt ... mochila22.txt dentro de casos/
+1. python generar_casos.py           # genera mochila10.txt ... mochila22.txt dentro de casos/
 2. python solucion_fuerza_bruta.py   # lee casos/, corre fuerza bruta, imprime resultados y guarda tiempos_fuerza_bruta.csv
 3. python solucion_backtracking.py   # lee casos/, corre backtracking, imprime resultados y guarda tiempos_backtracking.csv
 4. python graficos.py                # lee ambos CSV y genera grafico_fuerza_bruta.png, grafico_backtracking.png y grafico_comparativo.png dentro de graficos/
@@ -38,11 +38,19 @@ Los scripts tienen dependencias entre sí, así que hay que correrlos en este or
 
 El orden importa: sin correr `generar_casos.py` primero no hay archivos para leer en `casos/`, y sin correr ambas soluciones no hay CSV para que `graficos.py` pueda graficar.
 
+La corrida completa tarda unos 2 minutos, casi todo en `solucion_fuerza_bruta.py` (para n = 22 cada resolución tarda ~10 s y se repite 5 veces). `graficos.py` abre cada gráfico en una ventana: hay que cerrarla para que siga con el siguiente.
+
+## Generación de los casos
+
+`crear_mochila.py` es el script provisto por la cátedra y **no se modifica**. `generar_casos.py` importa su función `crear_mochila(n)` y la llama para cada n entre 10 y 22, parado en la carpeta `casos/`.
+
+Al importarlo, `crear_mochila.py` ejecuta su propia línea `crear_mochila(1000)`; como n = 1000 no se usa en este problema, `generar_casos.py` borra ese `mochila1000.txt` para que en `casos/` queden solo los 13 casos que se resuelven.
+
 ## Nota sobre los datos
 
 `crear_mochila.py` (y por lo tanto `generar_casos.py`) no usa una semilla fija, así que los datos generados (y por lo tanto los tiempos exactos medidos) van a variar levemente entre corridas.
 
-Cada caso se resuelve 5 veces (`REPETICIONES` en cada script de solución) y en el CSV se guarda el tiempo promedio, para reducir el ruido de mediciones aisladas. El análisis de por qué el tiempo de backtracking no es estrictamente creciente con `n` (depende de qué tan efectiva resulta la poda para cada instancia particular, no solo del tamaño) se desarrolla en el informe, no en este README.
+Cada caso se resuelve 5 veces (`REPETICIONES` en cada script de solución) y en el CSV se guarda el tiempo promedio (con 8 decimales), para reducir el ruido de mediciones aisladas. El análisis de por qué el tiempo de backtracking no es estrictamente creciente con `n` (depende de qué tan efectiva resulta la poda para cada instancia particular, no solo del tamaño) se desarrolla en el informe, no en este README.
 
 ## Requerimientos
 
@@ -50,4 +58,4 @@ Cada caso se resuelve 5 veces (`REPETICIONES` en cada script de solución) y en 
 - `numpy`
 - `matplotlib`
 
-(Los módulos `csv` y `time` son de la biblioteca estándar de Python y no requieren instalación aparte).
+(Los módulos `csv`, `os`, `sys` y `time` son de la biblioteca estándar de Python y no requieren instalación aparte).
