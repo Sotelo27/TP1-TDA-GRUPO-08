@@ -5,8 +5,8 @@ Usa la funcion crear_mochila del script provisto por la catedra
 (crear_mochila.py), que se deja SIN MODIFICAR: este script solo la llama
 para cada tamaño de mochila que se necesita.
 
-    - rango chico  (n = 10, 15, ..., 40): para contrastar contra O(2^n)
-    - rango grande (n = 1000 a 20000): para ver la tendencia real del tiempo
+    - rango chico  (n = 10, 12, ..., 40): para contrastar contra O(2^n)
+    - rango grande (n = 1000, 2000, ..., 20000): para ver la tendencia real del tiempo
     - extra: instancias dificiles (casos/dificiles/), con su propia funcion
 """
 
@@ -14,9 +14,9 @@ import os
 import sys
 from random import randint
 
-VALORES_N_CHICO = [10, 15, 20, 25, 30, 35, 40]
-VALORES_N_GRANDE = [1000, 2000, 5000, 10000, 15000, 20000]
-VALORES_N_DIFICIL = [10, 20, 30, 40]
+VALORES_N_CHICO = list(range(10, 41, 2))
+VALORES_N_GRANDE = list(range(1000, 20001, 1000))
+VALORES_N_DIFICIL = list(range(10, 41, 2))
 
 CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
 CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")

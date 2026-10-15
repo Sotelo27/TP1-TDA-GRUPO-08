@@ -16,7 +16,7 @@ o
     py graficos.py
 
 Las carpetas casos/ y graficos/ se crean solas si no existen. La corrida completa de
-solucion.py tarda alrededor de 25 segundos.
+solucion.py tarda alrededor de 1 minuto y medio.
 
 `crear_mochila.py` es el script provisto por la cátedra y se deja sin modificar; `generar_casos.py` lo llama para cada tamaño de mochila.
 
@@ -24,9 +24,9 @@ solucion.py tarda alrededor de 25 segundos.
 
 | Experimento | Casos | CSV |
 |---|---|---|
-| Rango chico | n = 10, 15, 20, 25, 30, 35, 40 (crear_mochila.py) | `tiempos_pulp_chico.csv` |
-| Rango grande | n = 1000, 2000, 5000, 10000, 15000, 20000 (crear_mochila.py) | `tiempos_pulp_grande.csv` |
-| Extra: instancias difíciles | n = 10, 20, 30, 40, beneficio = peso + 20 (función propia en generar_casos.py) | `tiempos_pulp_dificil.csv` |
+| Rango chico | n = 10, 12, ..., 40 (crear_mochila.py) | `tiempos_pulp_chico.csv` |
+| Rango grande | n = 1000, 2000, ..., 20000 (crear_mochila.py) | `tiempos_pulp_grande.csv` |
+| Extra: instancias difíciles | n = 10, 12, ..., 40, beneficio = peso + 20 (función propia en generar_casos.py) | `tiempos_pulp_dificil.csv` |
 
 Cada instancia se resuelve 5 veces (`REPETICIONES` en solucion.py) y se guarda el promedio.
 Columnas de los CSV:

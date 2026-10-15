@@ -13,9 +13,9 @@ resuelve con el metodo Simplex y Branch and Bound.
 
 Se corren tres experimentos, cada uno con su propio CSV (los casos los
 genera generar_casos.py, que usa los mismos valores de n):
-    - rango chico  (n = 10, 15, ..., 40)          -> tiempos_pulp_chico.csv
-    - rango grande (n = 1000 a 20000)             -> tiempos_pulp_grande.csv
-    - instancias dificiles (extra, n = 10 a 40)   -> tiempos_pulp_dificil.csv
+    - rango chico  (n = 10, 12, ..., 40)          -> tiempos_pulp_chico.csv
+    - rango grande (n = 1000, 2000, ..., 20000)   -> tiempos_pulp_grande.csv
+    - instancias dificiles (extra, n = 10, 12, ..., 40) -> tiempos_pulp_dificil.csv
 """
 
 import csv
@@ -39,17 +39,17 @@ CARPETA_CASOS_DIFICILES = os.path.join(CARPETA_CASOS, "dificiles")
 EXPERIMENTOS = [
     (
         "rango chico",
-        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in [10, 15, 20, 25, 30, 35, 40]],
+        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in range(10, 41, 2)],
         "tiempos_pulp_chico.csv",
     ),
     (
         "rango grande",
-        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in [1000, 2000, 5000, 10000, 15000, 20000]],
+        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in range(1000, 20001, 1000)],
         "tiempos_pulp_grande.csv",
     ),
     (
         "instancias dificiles",
-        [os.path.join(CARPETA_CASOS_DIFICILES, f"mochila_dificil{n}.txt") for n in [10, 20, 30, 40]],
+        [os.path.join(CARPETA_CASOS_DIFICILES, f"mochila_dificil{n}.txt") for n in range(10, 41, 2)],
         "tiempos_pulp_dificil.csv",
     ),
 ]
