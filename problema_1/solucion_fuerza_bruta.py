@@ -15,9 +15,8 @@ beneficio total.
 Se implementa asi intencionalmente (sin poda): sirve como base de
 comparacion contra la version con backtracking (con poda) que se resuelve
 en otro archivo. Por eso mismo, solo es practico para valores de n chicos;
-este script procesa los archivos mochila10.txt, mochila13.txt,
-mochila16.txt, mochila19.txt y mochila22.txt generados por
-crear_mochila.py, y guarda los tiempos obtenidos en un CSV para poder
+este script procesa los archivos mochila10.txt ... mochila22.txt (uno por
+cada n entre 10 y 22) generados por crear_mochila.py, y guarda los tiempos obtenidos en un CSV para poder
 graficarlos despues.
 """
 
@@ -27,13 +26,12 @@ import time
 
 # Archivos de mochila a procesar, en orden creciente de tamano. Se asume
 # que estan en la subcarpeta casos/, generados con crear_mochila.py.
-ARCHIVOS_MOCHILA = [
-    "mochila10.txt",
-    "mochila13.txt",
-    "mochila16.txt",
-    "mochila19.txt",
-    "mochila22.txt",
-]
+ARCHIVOS_MOCHILA = [f"mochila{n}.txt" for n in range(10, 23)]
+
+# Cantidad de veces que se resuelve cada archivo. El tiempo que se guarda
+# es el promedio de todas las repeticiones, para que una medicion aislada
+# afectada por ruido del sistema no distorsione los graficos.
+REPETICIONES = 5
 
 # Carpeta donde vive este script y subcarpeta donde estan los archivos de
 # entrada. El CSV de salida se sigue guardando junto al script.
@@ -131,11 +129,14 @@ if __name__ == "__main__":
         capacidad, items = parsear_mochila(ruta_archivo)
         n = len(items)
 
-        inicio = time.perf_counter()
-        beneficio_maximo, indices_elegidos, peso_total = fuerza_bruta(capacidad, items)
-        fin = time.perf_counter()
+        tiempos = []
+        for _ in range(REPETICIONES):
+            inicio = time.perf_counter()
+            beneficio_maximo, indices_elegidos, peso_total = fuerza_bruta(capacidad, items)
+            fin = time.perf_counter()
+            tiempos.append(fin - inicio)
 
-        tiempo_ejecucion = fin - inicio
+        tiempo_ejecucion = sum(tiempos) / REPETICIONES
 
         print(
             f"n={n} | capacidad={capacidad} | beneficio_maximo={beneficio_maximo} "
@@ -148,7 +149,7 @@ if __name__ == "__main__":
                 "capacidad": capacidad,
                 "beneficio_maximo": beneficio_maximo,
                 "peso_usado": peso_total,
-                "tiempo_segundos": round(tiempo_ejecucion, 6),
+                "tiempo_segundos": round(tiempo_ejecucion, 8),
             }
         )
 

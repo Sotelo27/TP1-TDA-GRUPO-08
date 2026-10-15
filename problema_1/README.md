@@ -17,7 +17,7 @@ Ambos enfoques llegan exactamente al mismo resultado óptimo; lo que cambia es e
 |---|---|
 | `casos/` | Archivos `.txt` con las instancias de mochila a resolver, generados por `crear_mochila.py`. |
 | `graficos/` | Gráficos `.png` generados por `graficos.py`. |
-| `crear_mochila.py` | Genera los casos de prueba (`mochila10.txt`, `mochila13.txt`, `mochila16.txt`, `mochila19.txt`, `mochila22.txt`) dentro de `casos/`. |
+| `crear_mochila.py` | Genera los casos de prueba (`mochila10.txt` ... `mochila22.txt`, uno por cada n entre 10 y 22) dentro de `casos/`. |
 | `solucion_fuerza_bruta.py` | Lee los casos de `casos/`, resuelve cada uno por fuerza bruta y guarda los tiempos en `tiempos_fuerza_bruta.csv`. |
 | `solucion_backtracking.py` | Lee los mismos casos de `casos/`, los resuelve por backtracking y guarda los tiempos en `tiempos_backtracking.csv`. |
 | `graficos.py` | Lee ambos CSV y genera los tres gráficos comparativos dentro de `graficos/`. |
@@ -39,7 +39,9 @@ El orden importa: sin correr `crear_mochila.py` primero no hay archivos para lee
 
 ## Nota sobre los datos
 
-`crear_mochila.py` no usa una semilla fija, así que los datos generados (y por lo tanto los tiempos exactos medidos) van a variar levemente entre corridas. El análisis de por qué el tiempo de backtracking no es estrictamente creciente con `n` (depende de qué tan efectiva resulta la poda para cada instancia particular, no solo del tamaño) se desarrolla en el informe, no en este README.
+`crear_mochila.py` no usa una semilla fija, así que los datos generados (y por lo tanto los tiempos exactos medidos) van a variar levemente entre corridas.
+
+Cada caso se resuelve 5 veces (`REPETICIONES` en cada script de solución) y en el CSV se guarda el tiempo promedio, para reducir el ruido de mediciones aisladas. El análisis de por qué el tiempo de backtracking no es estrictamente creciente con `n` (depende de qué tan efectiva resulta la poda para cada instancia particular, no solo del tamaño) se desarrolla en el informe, no en este README.
 
 ## Requerimientos
 

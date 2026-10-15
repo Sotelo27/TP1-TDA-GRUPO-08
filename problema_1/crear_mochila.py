@@ -16,7 +16,7 @@ def crear_mochila(n):
         arch.write(str(peso)+","+str(benef)+"\n")
     arch.close()
     
-for n in [10, 13, 16, 19, 22]:
+for n in range(10, 23):
     crear_mochila(n)
 
 # Esta función crea una mochila con una lista del tamaño indicado como parámetro
