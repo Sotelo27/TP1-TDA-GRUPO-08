@@ -1,12 +1,7 @@
-import os
 from random import randint
 
-CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
-CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
-
 def crear_mochila(n):
-    os.makedirs(CARPETA_CASOS, exist_ok=True)
-    nombre=os.path.join(CARPETA_CASOS, "mochila"+str(n)+".txt")
+    nombre="mochila"+str(n)+".txt"
     arch=open(nombre,"w")
     cap=n*50
     arch.write(str(cap)+"\n")
@@ -16,8 +11,7 @@ def crear_mochila(n):
         arch.write(str(peso)+","+str(benef)+"\n")
     arch.close()
     
-for n in range(10, 23):
-    crear_mochila(n)
+crear_mochila(1000)
 
 # Esta función crea una mochila con una lista del tamaño indicado como parámetro
 # Los beneficios están en el rango 1-1000

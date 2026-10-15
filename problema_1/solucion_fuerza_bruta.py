@@ -25,7 +25,7 @@ import os
 import time
 
 # Archivos de mochila a procesar, en orden creciente de tamano. Se asume
-# que estan en la subcarpeta casos/, generados con crear_mochila.py.
+# que estan en la subcarpeta casos/, generados con generar_casos.py.
 ARCHIVOS_MOCHILA = [f"mochila{n}.txt" for n in range(10, 23)]
 
 # Cantidad de veces que se resuelve cada archivo. El tiempo que se guarda
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         ruta_archivo = os.path.join(CARPETA_CASOS, nombre_archivo)
 
         if not os.path.isfile(ruta_archivo):
-            print(f"No se encontró {nombre_archivo}, corré crear_mochila.py primero.")
+            print(f"No se encontró {nombre_archivo}, corré generar_casos.py primero.")
             continue
 
         # La lectura y el parseo del archivo NO se incluyen en la

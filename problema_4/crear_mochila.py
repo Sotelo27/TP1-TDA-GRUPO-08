@@ -1,4 +1,3 @@
-import os
 from random import randint
 
 def crear_mochila(n):
@@ -11,14 +10,8 @@ def crear_mochila(n):
         benef=randint(1,1000);
         arch.write(str(peso)+","+str(benef)+"\n")
     arch.close()
-
-# Los archivos se generan dentro de la subcarpeta casos/
-CARPETA_CASOS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "casos")
-os.makedirs(CARPETA_CASOS, exist_ok=True)
-os.chdir(CARPETA_CASOS)
-
-for n in [1000, 2000, 5000, 10000, 20000]:
-    crear_mochila(n)
+    
+crear_mochila(1000)
 
 # Esta función crea una mochila con una lista del tamaño indicado como parámetro
 # Los beneficios están en el rango 1-1000
@@ -27,3 +20,4 @@ for n in [1000, 2000, 5000, 10000, 20000]:
 #
 # Se genera un archivo cuya primera línea es la capacidad de la mochila
 # Las líneas siguientes son pares ordenados (peso, beneficio) de cada elemento.
+

@@ -10,33 +10,72 @@ Se plantea la mochila 0/1 como un problema de Programacion Lineal Entera:
 
 PuLP le pasa el modelo al solver CBC (incluido con la biblioteca), que lo
 resuelve con el metodo Simplex y Branch and Bound.
+
+Se corren tres experimentos, cada uno con su propio CSV (los casos los
+genera generar_casos.py, que usa los mismos valores de n):
+    - rango chico  (n = 10, 15, ..., 40)          -> tiempos_pulp_chico.csv
+    - rango grande (n = 1000 a 20000)             -> tiempos_pulp_grande.csv
+    - instancias dificiles (extra, n = 10 a 40)   -> tiempos_pulp_dificil.csv
 """
 
 import csv
 import os
+import re
+import tempfile
 import time
 
 import pulp
 
-# Archivos de mochila a procesar, en orden creciente de tamano. Se asume
-# que estan en la subcarpeta casos/, generados con crear_mochila.py.
-ARCHIVOS_MOCHILA = [
-    "mochila1000.txt",
-    "mochila2000.txt",
-    "mochila5000.txt",
-    "mochila10000.txt",
-    "mochila20000.txt",
-]
-
 # Carpeta donde vive este script y subcarpeta donde estan los archivos de
-# entrada. El CSV de salida se guarda junto al script.
+# entrada. Los CSV de salida se guardan junto al script.
 CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
 CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
+CARPETA_CASOS_DIFICILES = os.path.join(CARPETA_CASOS, "dificiles")
 
-# Nombre del CSV donde se van a guardar los resultados (uno por archivo
-# procesado), para poder comparar despues contra los otros enfoques.
-NOMBRE_CSV_SALIDA = "tiempos_pulp.csv"
-RUTA_CSV_SALIDA = os.path.join(CARPETA_SCRIPT, NOMBRE_CSV_SALIDA)
+# Experimentos a correr: (nombre, lista de archivos de entrada, CSV de salida).
+# Los dos primeros usan las instancias de crear_mochila.py (el de la catedra);
+# el tercero usa las instancias dificiles y queda separado del experimento
+# principal.
+EXPERIMENTOS = [
+    (
+        "rango chico",
+        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in [10, 15, 20, 25, 30, 35, 40]],
+        "tiempos_pulp_chico.csv",
+    ),
+    (
+        "rango grande",
+        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in [1000, 2000, 5000, 10000, 15000, 20000]],
+        "tiempos_pulp_grande.csv",
+    ),
+    (
+        "instancias dificiles",
+        [os.path.join(CARPETA_CASOS_DIFICILES, f"mochila_dificil{n}.txt") for n in [10, 20, 30, 40]],
+        "tiempos_pulp_dificil.csv",
+    ),
+]
+
+# Cantidad de veces que se resuelve cada archivo. Los tiempos que se guardan
+# son el promedio de todas las repeticiones, para que una medicion aislada
+# afectada por ruido del sistema no distorsione los graficos.
+REPETICIONES = 5
+
+# Archivo temporal donde CBC escribe su log, del que se extrae la cantidad de
+# nodos de Branch and Bound y el tiempo que tardo CBC internamente.
+RUTA_LOG_CBC = os.path.join(tempfile.gettempdir(), "tda_tp1_cbc.log")
+
+COLUMNAS_CSV = [
+    "n",
+    "capacidad",
+    "estado",
+    "beneficio_maximo",
+    "peso_usado",
+    "nodos_bb",
+    "tiempo_construccion",
+    "tiempo_resolucion",
+    "tiempo_cbc_interno",
+    "tiempo_total",
+]
+
 
 def parsear_mochila(ruta_archivo):
     """
@@ -62,7 +101,7 @@ def parsear_mochila(ruta_archivo):
 
     return capacidad, items
 
-def mochila_pulp(capacidad, items):
+def construir_modelo(capacidad, items):
 
     n = len(items)
 
@@ -78,19 +117,119 @@ def mochila_pulp(capacidad, items):
     # Restriccion: la suma de los pesos de los elementos elegidos no puede superar la capacidad.
     problema += pulp.lpSum(items[i][0] * y[i] for i in range(n)) <= capacidad
 
-    # Se resuelve con el solver CBC (msg=False para que no imprima su log).
-    problema.solve(pulp.PULP_CBC_CMD(msg=False))
+    return problema, y
+
+def resolver_modelo(problema, y, items, ruta_log=None):
+
+    # Se resuelve con el solver CBC (msg=False para que no imprima su log;
+    # si se pasa ruta_log, CBC lo escribe en ese archivo).
+    problema.solve(pulp.PULP_CBC_CMD(msg=False, logPath=ruta_log))
 
     # Se leen los elementos cuya variable quedo en 1.
-    mejores_indices = [i for i in range(n) if round(y[i].value()) == 1]
+    mejores_indices = [i for i in range(len(items)) if round(y[i].value()) == 1]
     mejor_beneficio = sum(items[i][1] for i in mejores_indices)
     mejor_peso = sum(items[i][0] for i in mejores_indices)
 
     return mejor_beneficio, mejores_indices, mejor_peso
 
-if __name__ == "__main__":
+def mochila_pulp(capacidad, items):
+    problema, y = construir_modelo(capacidad, items)
+    return resolver_modelo(problema, y, items)
+
+def leer_log_cbc(ruta_log):
+    """
+    Extrae del log de CBC la cantidad de nodos de Branch and Bound
+    explorados ("Enumerated nodes") y el tiempo total que tardo CBC
+    internamente, medido por el propio CBC ("Total time ... Wallclock").
+    Si no encuentra alguno de los dos datos, devuelve None en su lugar.
+    """
+    with open(ruta_log, "r", errors="ignore") as archivo:
+        texto = archivo.read()
+
+    nodos = re.findall(r"Enumerated nodes:\s+(\d+)", texto)
+    tiempo = re.findall(r"Total time \(CPU seconds\):\s+[\d.]+\s+\(Wallclock seconds\):\s+([\d.]+)", texto)
+
+    nodos_bb = int(nodos[-1]) if nodos else None
+    tiempo_cbc = float(tiempo[-1]) if tiempo else None
+    return nodos_bb, tiempo_cbc
+
+def medir_instancia(capacidad, items):
+    """
+    Resuelve la instancia REPETICIONES veces y devuelve un diccionario con
+    los resultados y los tiempos promedio de construccion del modelo, de
+    resolucion (prob.solve) y total, mas los datos extraidos del log de CBC.
+    """
+    tiempos_construccion = []
+    tiempos_resolucion = []
+    tiempos_cbc = []
+
+    for _ in range(REPETICIONES):
+        if os.path.exists(RUTA_LOG_CBC):
+            os.remove(RUTA_LOG_CBC)
+
+        inicio = time.perf_counter()
+        problema, y = construir_modelo(capacidad, items)
+        medio = time.perf_counter()
+        beneficio_maximo, indices_elegidos, peso_total = resolver_modelo(problema, y, items, RUTA_LOG_CBC)
+        fin = time.perf_counter()
+
+        tiempos_construccion.append(medio - inicio)
+        tiempos_resolucion.append(fin - medio)
+
+        nodos_bb, tiempo_cbc = leer_log_cbc(RUTA_LOG_CBC)
+        if tiempo_cbc is not None:
+            tiempos_cbc.append(tiempo_cbc)
+
+    tiempo_construccion = sum(tiempos_construccion) / REPETICIONES
+    tiempo_resolucion = sum(tiempos_resolucion) / REPETICIONES
+
+    return {
+        "n": len(items),
+        "capacidad": capacidad,
+        "estado": pulp.LpStatus[problema.status],
+        "beneficio_maximo": beneficio_maximo,
+        "peso_usado": peso_total,
+        "nodos_bb": nodos_bb,
+        "tiempo_construccion": round(tiempo_construccion, 8),
+        "tiempo_resolucion": round(tiempo_resolucion, 8),
+        "tiempo_cbc_interno": round(sum(tiempos_cbc) / len(tiempos_cbc), 8) if tiempos_cbc else None,
+        "tiempo_total": round(tiempo_construccion + tiempo_resolucion, 8),
+    }
+
+def correr_experimento(nombre, rutas_archivos, nombre_csv):
+    print(f"\n=== Experimento: {nombre} ===")
 
     filas_csv = []
+    for ruta_archivo in rutas_archivos:
+        if not os.path.isfile(ruta_archivo):
+            print(f"No se encontró {os.path.basename(ruta_archivo)}, corré generar_casos.py primero.")
+            continue
+
+        # La lectura y el parseo del archivo NO se incluyen en la medicion.
+        capacidad, items = parsear_mochila(ruta_archivo)
+        fila = medir_instancia(capacidad, items)
+
+        print(
+            f"n={fila['n']} | estado={fila['estado']} | beneficio_maximo={fila['beneficio_maximo']} "
+            f"| peso_usado={fila['peso_usado']} | nodos_bb={fila['nodos_bb']} "
+            f"| construccion={fila['tiempo_construccion']:.6f} s | resolucion={fila['tiempo_resolucion']:.6f} s "
+            f"| total={fila['tiempo_total']:.6f} s"
+        )
+        filas_csv.append(fila)
+
+    # Se guardan los resultados en un CSV para poder graficarlos despues
+    if filas_csv:
+        ruta_csv = os.path.join(CARPETA_SCRIPT, nombre_csv)
+        with open(ruta_csv, "w", newline="") as archivo_csv:
+            escritor = csv.DictWriter(archivo_csv, fieldnames=COLUMNAS_CSV)
+            escritor.writeheader()
+            escritor.writerows(filas_csv)
+
+        print(f"Resultados guardados en {ruta_csv}")
+    else:
+        print("No se proceso ningun archivo, no se genero el CSV.")
+
+if __name__ == "__main__":
 
     # Calentamiento: la primera resolución con PuLP es más lenta que las demás
     # porque el sistema todavía no tiene en memoria el ejecutable del solver CBC
@@ -99,47 +238,8 @@ if __name__ == "__main__":
     # primera mochila medida.
     mochila_pulp(50, [(10, 60), (20, 100), (30, 120)])
 
-    for nombre_archivo in ARCHIVOS_MOCHILA:
-        ruta_archivo = os.path.join(CARPETA_CASOS, nombre_archivo)
+    inicio_corrida = time.perf_counter()
+    for nombre, rutas_archivos, nombre_csv in EXPERIMENTOS:
+        correr_experimento(nombre, rutas_archivos, nombre_csv)
 
-        if not os.path.isfile(ruta_archivo):
-            print(f"No se encontró {nombre_archivo}, corré crear_mochila.py primero.")
-            continue
-
-
-        capacidad, items = parsear_mochila(ruta_archivo)
-        n = len(items)
-
-        inicio = time.perf_counter()
-        beneficio_maximo, indices_elegidos, peso_total = mochila_pulp(capacidad, items)
-        fin = time.perf_counter()
-
-        tiempo_ejecucion = fin - inicio
-
-        print(
-            f"n={n} | capacidad={capacidad} | beneficio_maximo={beneficio_maximo} "
-            f"| peso_usado={peso_total} | tiempo={tiempo_ejecucion:.6f} s"
-        )
-
-
-        filas_csv.append(
-            {
-                "n": n,
-                "capacidad": capacidad,
-                "beneficio_maximo": beneficio_maximo,
-                "peso_usado": peso_total,
-                "tiempo_segundos": round(tiempo_ejecucion, 4),
-            }
-        )
-
-    # Se guardan los resultados en un CSV para poder comparar
-    if filas_csv:
-        with open(RUTA_CSV_SALIDA, "w", newline="") as archivo_csv:
-            columnas = ["n", "capacidad", "beneficio_maximo", "peso_usado", "tiempo_segundos"]
-            escritor = csv.DictWriter(archivo_csv, fieldnames=columnas)
-            escritor.writeheader()
-            escritor.writerows(filas_csv)
-
-        print(f"\nResultados guardados en {RUTA_CSV_SALIDA}")
-    else:
-        print("\nNo se proceso ningun archivo, no se genero el CSV.")
+    print(f"\nCorrida completa: {time.perf_counter() - inicio_corrida:.1f} s")

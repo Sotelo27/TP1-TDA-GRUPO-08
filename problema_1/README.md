@@ -15,9 +15,10 @@ Ambos enfoques llegan exactamente al mismo resultado óptimo; lo que cambia es e
 
 | Archivo / carpeta | Descripción |
 |---|---|
-| `casos/` | Archivos `.txt` con las instancias de mochila a resolver, generados por `crear_mochila.py`. |
+| `casos/` | Archivos `.txt` con las instancias de mochila a resolver, generados por `generar_casos.py`. |
 | `graficos/` | Gráficos `.png` generados por `graficos.py`. |
-| `crear_mochila.py` | Genera los casos de prueba (`mochila10.txt` ... `mochila22.txt`, uno por cada n entre 10 y 22) dentro de `casos/`. |
+| `crear_mochila.py` | Script provisto por la cátedra, sin modificar. Define la función `crear_mochila(n)`. |
+| `generar_casos.py` | Llama a `crear_mochila(n)` para generar los casos de prueba (`mochila10.txt` ... `mochila22.txt`, uno por cada n entre 10 y 22) dentro de `casos/`. |
 | `solucion_fuerza_bruta.py` | Lee los casos de `casos/`, resuelve cada uno por fuerza bruta y guarda los tiempos en `tiempos_fuerza_bruta.csv`. |
 | `solucion_backtracking.py` | Lee los mismos casos de `casos/`, los resuelve por backtracking y guarda los tiempos en `tiempos_backtracking.csv`. |
 | `graficos.py` | Lee ambos CSV y genera los tres gráficos comparativos dentro de `graficos/`. |
@@ -29,17 +30,17 @@ Ambos enfoques llegan exactamente al mismo resultado óptimo; lo que cambia es e
 Los scripts tienen dependencias entre sí, así que hay que correrlos en este orden:
 
 ```
-1. python crear_mochila.py           # genera mochila10.txt ... mochila22.txt dentro de casos/
+1. python generar_casos.py          # genera mochila10.txt ... mochila22.txt dentro de casos/
 2. python solucion_fuerza_bruta.py   # lee casos/, corre fuerza bruta, imprime resultados y guarda tiempos_fuerza_bruta.csv
 3. python solucion_backtracking.py   # lee casos/, corre backtracking, imprime resultados y guarda tiempos_backtracking.csv
 4. python graficos.py                # lee ambos CSV y genera grafico_fuerza_bruta.png, grafico_backtracking.png y grafico_comparativo.png dentro de graficos/
 ```
 
-El orden importa: sin correr `crear_mochila.py` primero no hay archivos para leer en `casos/`, y sin correr ambas soluciones no hay CSV para que `graficos.py` pueda graficar.
+El orden importa: sin correr `generar_casos.py` primero no hay archivos para leer en `casos/`, y sin correr ambas soluciones no hay CSV para que `graficos.py` pueda graficar.
 
 ## Nota sobre los datos
 
-`crear_mochila.py` no usa una semilla fija, así que los datos generados (y por lo tanto los tiempos exactos medidos) van a variar levemente entre corridas.
+`crear_mochila.py` (y por lo tanto `generar_casos.py`) no usa una semilla fija, así que los datos generados (y por lo tanto los tiempos exactos medidos) van a variar levemente entre corridas.
 
 Cada caso se resuelve 5 veces (`REPETICIONES` en cada script de solución) y en el CSV se guarda el tiempo promedio, para reducir el ruido de mediciones aisladas. El análisis de por qué el tiempo de backtracking no es estrictamente creciente con `n` (depende de qué tan efectiva resulta la poda para cada instancia particular, no solo del tamaño) se desarrolla en el informe, no en este README.
 
