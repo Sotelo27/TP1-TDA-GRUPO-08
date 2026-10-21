@@ -68,16 +68,15 @@ def errores_ajuste(tiempo_medido, tiempo_modelo):
 def grafico_teorico_2n(datos):
     """
     Rango chico: tiempo medido contra la curva teorica c * 2^n. La constante
-    se ajusta por minimos cuadrados en escala logaritmica, con la pendiente
-    fija en log 2:
-        log T = log c + n * log 2   =>   log c = promedio(log T - n * log 2)
-    Todo se calcula en logaritmos para que 2^n no desborde.
+    c se elige para que la curva pase por el primer punto medido:
+        c = T(n0) / 2^n0   =>   T_teorico(n) = T(n0) * 2^(n - n0)
+    Es decir: "si a partir de n0 el tiempo creciera como 2^n".
     """
     n = datos["n"]
     tiempo = datos["tiempo_total"]
 
-    log_c = np.mean(np.log(tiempo) - n * math.log(2))
-    tiempo_teorico = np.exp(log_c + n * math.log(2))
+    n0, t0 = n[0], tiempo[0]
+    tiempo_teorico = t0 * 2.0 ** (n - n0)
 
     # Ajuste exponencial libre (log T = a + b*n): la base empirica e^b
     # indica cuanto se multiplica el tiempo medido por cada elemento extra.
@@ -86,9 +85,9 @@ def grafico_teorico_2n(datos):
 
     plt.figure()
     plt.plot(n, tiempo, marker="o", label="Tiempo medido (total)")
-    plt.plot(n, tiempo_teorico, linestyle="--", label="Curva teórica ajustada (O(2^n))")
+    plt.plot(n, tiempo_teorico, linestyle="--", label="Curva teórica c·2ⁿ (peor caso)")
     plt.yscale("log")
-    plt.title("PuLP: tiempo medido vs. complejidad teórica O(2^n)")
+    plt.title("PuLP: tiempo medido vs. complejidad teórica O(2ⁿ)")
     plt.xlabel("n = cantidad de elementos")
     plt.ylabel("tiempo (segundos, escala logarítmica)")
     plt.grid(True, which="both")
@@ -98,10 +97,11 @@ def grafico_teorico_2n(datos):
     plt.close()
 
     print("=== Rango chico: contraste contra O(2^n) ===")
-    print(f"Constante ajustada c*2^n (en log): c = {math.exp(log_c):.6e}")
+    print(f"Constante c = T({int(n0)}) / 2^{int(n0)} = {t0 / 2.0 ** n0:.6e}")
     print(f"Tiempo medido: de {tiempo.min():.4f} s a {tiempo.max():.4f} s "
           f"(x{tiempo[-1] / tiempo[0]:.2f} entre n={int(n[0])} y n={int(n[-1])})")
-    print(f"La curva 2^n crece x{2.0 ** (n[-1] - n[0]):.3e} en el mismo rango")
+    print(f"Tiempo teorico para n={int(n[-1])}: {tiempo_teorico[-1]:.3e} s "
+          f"(x{2.0 ** (n[-1] - n[0]):.3e} respecto de n={int(n[0])})")
     print(f"Base empirica del ajuste exponencial libre: {base_empirica:.4f} por elemento (teorica: 2)")
 
 
