@@ -40,9 +40,9 @@ Dos algoritmos de **Programación Dinámica** para el problema de la mochila:
 
 ### Problema 4 – Programación Lineal
 Algoritmo que resuelve el problema de la mochila 0/1 mediante **Programación Lineal Entera**, utilizando la biblioteca **PuLP** (con el solver CBC, incluido en la biblioteca).
-- `generar_casos.py` genera los sets de datos en `casos/` usando `crear_mochila.py`: un rango chico (n = 10 a 40) y un rango grande (n = 1000 a 20000), más instancias difíciles extra en `casos/dificiles/`.
-- `solucion.py` arma el modelo (variables binarias Yi, función objetivo y restricción de capacidad), lo resuelve con PuLP y guarda los resultados, tiempos y nodos de Branch and Bound en `tiempos_pulp_chico.csv`, `tiempos_pulp_grande.csv` y `tiempos_pulp_dificil.csv`.
-- `graficos.py` contrasta los tiempos medidos contra la complejidad teórica O(2^n) y contra modelos polinomiales, y guarda los gráficos en `graficos/`.
+- `generar_casos.py` genera los sets de datos en `casos/` usando `crear_mochila.py` de la cátedra (sin modificar): rango chico (n = 10 a 40), rango grande (n = 1000 a 20000, 5 mochilas distintas por cada n) e instancias difíciles (n = 10 a 40) en `casos/dificiles/`.
+- `solucion.py` arma el modelo (variables binarias Yi, función objetivo y restricción de capacidad), lo resuelve con PuLP y guarda resultados, nodos de Branch and Bound explorados y tiempos en `tiempos_pulp_chico.csv`, `tiempos_pulp_grande.csv` y `tiempos_pulp_dificil.csv`.
+- `graficos.py` genera cuatro gráficos en `graficos/`: tiempo medido vs. complejidad teórica O(2ⁿ) (rango chico), comparación de modelos de crecimiento c·n, c·n·log n y c·n² (rango grande), construcción del modelo vs. resolución, e instancias aleatorias vs. difíciles.
 - Incluye las instrucciones de ejecución en el `README.md` interno.
 - **Requiere PuLP 3.x** (`pip install "pulp<4"`): la versión 4.0 cambió la forma de crear variables y no es compatible con el código.
 

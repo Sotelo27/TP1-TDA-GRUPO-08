@@ -25,10 +25,13 @@ solucion.py tarda alrededor de 1 minuto y medio.
 | Experimento | Casos | CSV |
 |---|---|---|
 | Rango chico | n = 10, 12, ..., 40 (crear_mochila.py) | `tiempos_pulp_chico.csv` |
-| Rango grande | n = 1000, 2000, ..., 20000 (crear_mochila.py) | `tiempos_pulp_grande.csv` |
-| Extra: instancias difíciles | n = 10, 12, ..., 40, beneficio = peso + 20 (función propia en generar_casos.py) | `tiempos_pulp_dificil.csv` |
+| Rango grande | n = 1000, 2000, ..., 20000, 5 mochilas distintas por cada n: `mochila<n>_1.txt` ... `mochila<n>_5.txt` (crear_mochila.py) | `tiempos_pulp_grande.csv` |
 
-Cada instancia se resuelve 5 veces (`REPETICIONES` en solucion.py) y se guarda el promedio.
+En el rango chico y en las instancias difíciles, cada mochila se resuelve 5 veces y se guarda el promedio.
+En el rango grande se resuelven 5 mochilas distintas por cada n (una vez cada una) y se guarda el promedio,
+porque ahí el tiempo varía más entre mochilas que entre repeticiones de la misma. Por eso en
+`tiempos_pulp_grande.csv` los valores de `beneficio_maximo`, `peso_usado` y `nodos_bb` también son promedios.
+
 Columnas de los CSV:
 
 - `estado`: estado que devuelve el solver (tiene que ser `Optimal`).
