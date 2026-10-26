@@ -15,6 +15,7 @@ Se corren tres experimentos, cada uno con su propio CSV (los casos los
 genera generar_casos.py, que usa los mismos valores de n):
     - rango chico  (n = 10, 12, ..., 40)          -> tiempos_pulp_chico.csv
     - rango grande (n = 1000, 2000, ..., 20000)   -> tiempos_pulp_grande.csv
+      (5 mochilas distintas por cada n, se promedian sus tiempos)
     - instancias dificiles (extra, n = 10, 12, ..., 40) -> tiempos_pulp_dificil.csv
 """
 
@@ -32,32 +33,41 @@ CARPETA_SCRIPT = os.path.dirname(os.path.abspath(__file__))
 CARPETA_CASOS = os.path.join(CARPETA_SCRIPT, "casos")
 CARPETA_CASOS_DIFICILES = os.path.join(CARPETA_CASOS, "dificiles")
 
-# Experimentos a correr: (nombre, lista de archivos de entrada, CSV de salida).
-# Los dos primeros usan las instancias de crear_mochila.py (el de la catedra);
-# el tercero usa las instancias dificiles y queda separado del experimento
-# principal.
+# Cantidad de mochilas distintas por cada n en el rango grande (tiene que
+# coincidir con INSTANCIAS_POR_N de generar_casos.py).
+INSTANCIAS_POR_N = 5
+
+# Experimentos a correr: (nombre, grupos de archivos, CSV de salida, repeticiones).
+# Cada grupo es la lista de archivos de un mismo n; si tiene varios archivos,
+# se promedian sus resultados en una sola fila del CSV.
+#   - Rango chico y dificiles: 1 archivo por n, resuelto 5 veces (se promedia
+#     para reducir el ruido de la maquina).
+#   - Rango grande: 5 mochilas distintas por n, cada una resuelta 1 vez. Aca
+#     el ruido principal no es la maquina sino la mochila: CBC tarda distinto
+#     segun la instancia, asi que se promedian instancias distintas.
 EXPERIMENTOS = [
     (
         "rango chico",
-        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in range(10, 41, 2)],
+        [[os.path.join(CARPETA_CASOS, f"mochila{n}.txt")] for n in range(10, 41, 2)],
         "tiempos_pulp_chico.csv",
+        5,
     ),
     (
         "rango grande",
-        [os.path.join(CARPETA_CASOS, f"mochila{n}.txt") for n in range(1000, 20001, 1000)],
+        [
+            [os.path.join(CARPETA_CASOS, f"mochila{n}_{k}.txt") for k in range(1, INSTANCIAS_POR_N + 1)]
+            for n in range(1000, 20001, 1000)
+        ],
         "tiempos_pulp_grande.csv",
+        1,
     ),
     (
         "instancias dificiles",
-        [os.path.join(CARPETA_CASOS_DIFICILES, f"mochila_dificil{n}.txt") for n in range(10, 41, 2)],
+        [[os.path.join(CARPETA_CASOS_DIFICILES, f"mochila_dificil{n}.txt")] for n in range(10, 41, 2)],
         "tiempos_pulp_dificil.csv",
+        5,
     ),
 ]
-
-# Cantidad de veces que se resuelve cada archivo. Los tiempos que se guardan
-# son el promedio de todas las repeticiones, para que una medicion aislada
-# afectada por ruido del sistema no distorsione los graficos.
-REPETICIONES = 5
 
 # Archivo temporal donde CBC escribe su log, del que se extrae la cantidad de
 # nodos de Branch and Bound y el tiempo que tardo CBC internamente.
@@ -153,9 +163,9 @@ def leer_log_cbc(ruta_log):
     tiempo_cbc = float(tiempo[-1]) if tiempo else None
     return nodos_bb, tiempo_cbc
 
-def medir_instancia(capacidad, items):
+def medir_instancia(capacidad, items, repeticiones):
     """
-    Resuelve la instancia REPETICIONES veces y devuelve un diccionario con
+    Resuelve la instancia "repeticiones" veces y devuelve un diccionario con
     los resultados y los tiempos promedio de construccion del modelo, de
     resolucion (prob.solve) y total, mas los datos extraidos del log de CBC.
     """
@@ -163,7 +173,7 @@ def medir_instancia(capacidad, items):
     tiempos_resolucion = []
     tiempos_cbc = []
 
-    for _ in range(REPETICIONES):
+    for _ in range(repeticiones):
         if os.path.exists(RUTA_LOG_CBC):
             os.remove(RUTA_LOG_CBC)
 
@@ -180,8 +190,8 @@ def medir_instancia(capacidad, items):
         if tiempo_cbc is not None:
             tiempos_cbc.append(tiempo_cbc)
 
-    tiempo_construccion = sum(tiempos_construccion) / REPETICIONES
-    tiempo_resolucion = sum(tiempos_resolucion) / REPETICIONES
+    tiempo_construccion = sum(tiempos_construccion) / repeticiones
+    tiempo_resolucion = sum(tiempos_resolucion) / repeticiones
 
     return {
         "n": len(items),
@@ -196,24 +206,50 @@ def medir_instancia(capacidad, items):
         "tiempo_total": round(tiempo_construccion + tiempo_resolucion, 8),
     }
 
-def correr_experimento(nombre, rutas_archivos, nombre_csv):
+def promediar_filas(filas):
+    """
+    Junta en una sola fila los resultados de varias mochilas del mismo n:
+    promedia los valores numericos y deja estado = Optimal solo si todas
+    las mochilas terminaron en Optimal.
+    """
+    if len(filas) == 1:
+        return filas[0]
+
+    promedio = {"n": filas[0]["n"], "capacidad": filas[0]["capacidad"]}
+    estados = {fila["estado"] for fila in filas}
+    promedio["estado"] = "Optimal" if estados == {"Optimal"} else "/".join(sorted(estados))
+
+    for columna in COLUMNAS_CSV:
+        if columna in promedio:
+            continue
+        valores = [fila[columna] for fila in filas if fila[columna] is not None]
+        promedio[columna] = round(sum(valores) / len(valores), 8) if valores else None
+    return promedio
+
+def correr_experimento(nombre, grupos_archivos, nombre_csv, repeticiones):
     print(f"\n=== Experimento: {nombre} ===")
 
     filas_csv = []
-    for ruta_archivo in rutas_archivos:
-        if not os.path.isfile(ruta_archivo):
-            print(f"No se encontró {os.path.basename(ruta_archivo)}, corré generar_casos.py primero.")
-            continue
+    for rutas_archivos in grupos_archivos:
+        filas_grupo = []
+        for ruta_archivo in rutas_archivos:
+            if not os.path.isfile(ruta_archivo):
+                print(f"No se encontró {os.path.basename(ruta_archivo)}, corré generar_casos.py primero.")
+                continue
 
-        # La lectura y el parseo del archivo NO se incluyen en la medicion.
-        capacidad, items = parsear_mochila(ruta_archivo)
-        fila = medir_instancia(capacidad, items)
+            # La lectura y el parseo del archivo NO se incluyen en la medicion.
+            capacidad, items = parsear_mochila(ruta_archivo)
+            filas_grupo.append(medir_instancia(capacidad, items, repeticiones))
+
+        if not filas_grupo:
+            continue
+        fila = promediar_filas(filas_grupo)
 
         print(
-            f"n={fila['n']} | estado={fila['estado']} | beneficio_maximo={fila['beneficio_maximo']} "
-            f"| peso_usado={fila['peso_usado']} | nodos_bb={fila['nodos_bb']} "
-            f"| construccion={fila['tiempo_construccion']:.6f} s | resolucion={fila['tiempo_resolucion']:.6f} s "
-            f"| total={fila['tiempo_total']:.6f} s"
+            f"n={fila['n']} | mochilas={len(filas_grupo)} | estado={fila['estado']} "
+            f"| beneficio_maximo={fila['beneficio_maximo']} | peso_usado={fila['peso_usado']} "
+            f"| nodos_bb={fila['nodos_bb']} | construccion={fila['tiempo_construccion']:.6f} s "
+            f"| resolucion={fila['tiempo_resolucion']:.6f} s | total={fila['tiempo_total']:.6f} s"
         )
         filas_csv.append(fila)
 
@@ -239,7 +275,7 @@ if __name__ == "__main__":
     mochila_pulp(50, [(10, 60), (20, 100), (30, 120)])
 
     inicio_corrida = time.perf_counter()
-    for nombre, rutas_archivos, nombre_csv in EXPERIMENTOS:
-        correr_experimento(nombre, rutas_archivos, nombre_csv)
+    for nombre, grupos_archivos, nombre_csv, repeticiones in EXPERIMENTOS:
+        correr_experimento(nombre, grupos_archivos, nombre_csv, repeticiones)
 
     print(f"\nCorrida completa: {time.perf_counter() - inicio_corrida:.1f} s")
