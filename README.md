@@ -1,87 +1,57 @@
-# Trabajo Práctico 1 - Teoría de Algoritmos (2° Cuatrimestre 2026)
+# Trabajo Práctico 2 - Teoría de Algoritmos (2° Cuatrimestre 2026)
 
 ## Descripción General
 
-Este repositorio contiene la resolución completa del **Trabajo Práctico 1** de la materia **Teoría de Algoritmos (TB024 - Curso Echevarría)** de la **Facultad de Ingeniería, UBA**.
+Resolución del **Trabajo Práctico 2** de **Teoría de Algoritmos (TB024 - Curso Echevarría)**, Facultad de Ingeniería, UBA. Aborda el **problema de la mochila 0/1** con algoritmos aproximados y randomizados.
 
-El trabajo aborda el **problema de la mochila (Knapsack Problem)** resuelto mediante distintas estrategias algorítmicas. Cada problema se encuentra desarrollado en su propia carpeta, con su correspondiente análisis (supuestos, diseño, pseudocódigo, complejidad), implementación, sets de datos, pruebas y gráficos de tiempos de ejecución.
+> Estado actual: el Problema 1 está resuelto. Los Problemas 2, 3 y 4 son plantillas por implementar.
 
 ---
 
 ## Contenido por Problema
 
-### Problema 1 – Fuerza Bruta vs. Backtracking
-Implementación del problema de la mochila mediante **fuerza bruta**, y luego mediante **backtracking** para llegar al mismo resultado en menos tiempo.
-- Contiene el código fuente y los tests asociados de ambas variantes.
-- `generar_casos.py` genera los sets de datos en `casos/` (n = 10 a 22) usando `crear_mochila.py`, que se deja sin modificar.
-- Cálculo del orden de complejidad temporal de ambos algoritmos. Cada caso se mide 5 veces y se guarda el promedio.
-- `graficos.py` compara la curva de tiempos de ejecución teórica y real de ambos algoritmos.
-- Incluye las instrucciones de ejecución en el `README.md` interno.
+- **Problema 1 - Algoritmo aproximado de Sahni:** comparación contra las cotas de relajación lineal y de Martello y Toth y contra el óptimo exacto.
+- **Problema 2 - Algoritmo arbitrariamente bueno:** épsilon parametrizable.
+- **Problema 3 - Algoritmo randomizado:** comparación con Greedy y Programación Dinámica del TP1.
+- **Problema 4 - Conclusiones:** comparación de tiempos de todos los algoritmos de los TPs 1 y 2.
 
 ---
 
-### Problema 2 – Algoritmo Greedy
-Resolución del problema de la mochila mediante un enfoque **Greedy**, con garantía de calidad 1/2.
-- Archivo `solucion.py` contiene la resolución.
-- `graficos.py` genera los gráficos de tiempos de ejecución teórica vs. real.
-- Incluye un set de datos creado manualmente para evidenciar el caso donde actúa la garantía de calidad.
-- Incluye sets de datos y tests automáticos.
+## Estructura
 
----
-
-### Problema 3 – Programación Dinámica
-Dos algoritmos de **Programación Dinámica** para el problema de la mochila:
-- Planteo **tradicional**: maximizar el beneficio para una capacidad fija.
-- Planteo **alternativo**: minimizar el peso para un beneficio fijo.
-- Cálculo del orden de complejidad temporal de ambos algoritmos.
-- `graficos.py` genera los gráficos comparativos (teórico vs. real, y entre ambos algoritmos).
-
----
-
-### Problema 4 – Programación Lineal
-Algoritmo que resuelve el problema de la mochila 0/1 mediante **Programación Lineal Entera**, utilizando la biblioteca **PuLP** (con el solver CBC, incluido en la biblioteca).
-- `generar_casos.py` genera los sets de datos en `casos/` usando `crear_mochila.py` de la cátedra (sin modificar): rango chico (n = 10 a 40), rango grande (n = 1000 a 20000, 5 mochilas distintas por cada n) e instancias difíciles (n = 10 a 40) en `casos/dificiles/`.
-- `solucion.py` arma el modelo (variables binarias Yi, función objetivo y restricción de capacidad), lo resuelve con PuLP y guarda resultados, nodos de Branch and Bound explorados y tiempos en `tiempos_pulp_chico.csv`, `tiempos_pulp_grande.csv` y `tiempos_pulp_dificil.csv`.
-- `graficos.py` genera cuatro gráficos en `graficos/`: tiempo medido vs. complejidad teórica O(2ⁿ) (rango chico), comparación de modelos de crecimiento c·n, c·n·log n y c·n² (rango grande), construcción del modelo vs. resolución, e instancias aleatorias vs. difíciles.
-- Incluye las instrucciones de ejecución en el `README.md` interno.
-- **Requiere PuLP 3.x** (`pip install "pulp<4"`): la versión 4.0 cambió la forma de crear variables y no es compatible con el código.
-
----
-
-### Conclusión
-Comparación, en los rangos en que sea posible, de los tiempos obtenidos para los mismos sets de datos por los 6 algoritmos desarrollados (fuerza bruta, backtracking, greedy, programación dinámica tradicional, programación dinámica alternativa y programación lineal). Análisis de los resultados obtenidos.
-
----
-
-## Generación de Sets de Datos
-
-Los sets de datos utilizados en los distintos problemas se generan a partir del script provisto por la cátedra `crear_mochila.py`, con tamaños adecuados para poder comparar la curva de tiempos de ejecución teórica y real de cada algoritmo.
-
----
-
-## Ejecución
-
-Cada carpeta de problema contiene un archivo `README.md` con instrucciones detalladas para:
-- Ejecutar las soluciones (`python solucion_X.py`)
-- Correr los tests (`pytest`)
-- Generar gráficos (`python graficos.py`)
+| Carpeta / archivo | Descripción |
+|---|---|
+| `problema_N/` | Casos, gráficos, scripts, resultados, README e `informe.md` de cada problema. |
+| `informe/` | Plantilla del informe general y PDF final. |
+| `tests/test_base.py` | Verificación del Problema 1 y de las plantillas. |
 
 ---
 
 ## Requerimientos
 
-- **Lenguaje:** Python 3.14+ (última versión estable disponible)
-- **Bibliotecas:** *(a completar a medida que se desarrolle el TP)*
-  - `matplotlib`
-  - `numpy`
-  - `pulp`
-  - `pytest`
+- **Lenguaje:** Python 3.14+
+- **Bibliotecas:** `matplotlib`, `numpy`
 
-Instalación de todas las bibliotecas:
+Instalación:
 
-    pip install "pulp<4" numpy matplotlib pytest
+    pip install numpy matplotlib
 
+---
+
+## Ejecución
+
+Parado en cada carpeta `problema_N/`, en este orden (el nombre de la solución de cada problema está en su `README.md` interno):
+
+    python generar_casos.py    -> genera los sets de datos en casos/
+    python solucion_X.py       -> resuelve, mide y guarda el CSV de resultados
+    python graficos.py         -> genera los gráficos en graficos/
+
+Verificación, parado en la raíz del repositorio:
+
+    python tests/test_base.py
+
+---
 
 ## Informe
 
-El informe completo (carátula, índice, supuestos, diseño, pseudocódigo, seguimiento, complejidad, sets de datos, tiempos de ejecución e informe de resultados de cada problema) se encuentra en la carpeta `informe`, en formato PDF.
+El informe se escribe en Google Docs a partir de `informe/plantilla_general.md` y de cada `problema_N/informe.md`. Se exporta como `informe/TP2_Informe_Grupo08.pdf`.

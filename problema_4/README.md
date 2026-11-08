@@ -1,61 +1,33 @@
-## Ejecución
+# Problema 4 - Mochila 0/1: Conclusiones
 
-Requiere **PuLP 3.x** (`pip install "pulp<4"`): la versión 4.0 cambió la forma de crear
-variables y no es compatible con el código. También usa `numpy` y `matplotlib` para los gráficos.
+> Plantilla: falta implementar la solución, los casos y los gráficos.
 
-Parado en la carpeta problema_4/, ejecutar en este orden:
+## Descripción del problema
 
-    python3 generar_casos.py           -> genera los .txt de prueba en casos/ (y los difíciles en casos/dificiles/)
-    python3 solucion.py                -> resuelve con PuLP y guarda los tres CSV de tiempos
-    python3 graficos.py                -> genera los gráficos en graficos/ e imprime los ajustes
+Compara, en los rangos en que sea posible, los tiempos de fuerza bruta, backtracking, greedy, programación dinámica tradicional, programación lineal, aproximado 1, aproximado 2 (épsilon fijo) y randomizado. Para los aproximados incluye las cotas de la relajación lineal y de Martello y Toth.
 
-o
+## Estructura de archivos y carpetas
 
-    py generar_casos.py
-    py solucion.py
-    py graficos.py
+| Archivo / carpeta | Descripción |
+|---|---|
+| `casos/` | Archivos `.txt` con las instancias, generados por `generar_casos.py`. |
+| `graficos/` | Gráficos `.png` generados por `graficos.py`. |
+| `generar_casos.py` | Genera los casos con la distribución de `crear_mochila.py` de la cátedra. |
+| `solucion.py` | Lee `casos/`, resuelve cada uno y guarda `tiempos_todos.csv`. |
+| `graficos.py` | Lee el CSV y genera los gráficos dentro de `graficos/`. |
+| `tiempos_todos.csv` | Resultados obtenidos para cada set de datos. |
+| `informe.md` | Plantilla de esta sección del informe, para pasar a Google Docs. |
 
-Las carpetas casos/ y graficos/ se crean solas si no existen. La corrida completa de
-solucion.py tarda alrededor de 1 minuto y medio.
+## Orden de ejecución
 
-`crear_mochila.py` es el script provisto por la cátedra y se deja sin modificar; `generar_casos.py` lo llama para cada tamaño de mochila.
+Parado en esta carpeta:
 
-## Experimentos
+```
+1. python generar_casos.py
+2. python solucion.py
+3. python graficos.py
+```
 
-| Experimento | Casos | CSV |
-|---|---|---|
-| Rango chico | n = 10, 12, ..., 40 (crear_mochila.py) | `tiempos_pulp_chico.csv` |
-| Rango grande | n = 1000, 2000, ..., 20000, 5 mochilas distintas por cada n: `mochila<n>_1.txt` ... `mochila<n>_5.txt` (crear_mochila.py) | `tiempos_pulp_grande.csv` |
+## Nota sobre los datos
 
-En el rango chico y en las instancias difíciles, cada mochila se resuelve 5 veces y se guarda el promedio.
-En el rango grande se resuelven 5 mochilas distintas por cada n (una vez cada una) y se guarda el promedio,
-porque ahí el tiempo varía más entre mochilas que entre repeticiones de la misma. Por eso en
-`tiempos_pulp_grande.csv` los valores de `beneficio_maximo`, `peso_usado` y `nodos_bb` también son promedios.
-
-Columnas de los CSV:
-
-- `estado`: estado que devuelve el solver (tiene que ser `Optimal`).
-- `beneficio_maximo`, `peso_usado`: solución encontrada.
-- `nodos_bb`: nodos de Branch and Bound explorados por CBC (se lee de su log).
-- `tiempo_construccion`: armado del modelo (variables, función objetivo y restricción).
-- `tiempo_resolucion`: `prob.solve`, incluye escribir el modelo, lanzar CBC y leer la solución.
-- `tiempo_cbc_interno`: tiempo que reporta el propio CBC en su log (resolución de 0.01 s).
-- `tiempo_total`: construcción + resolución.
-
-## Gráficos
-
-- `grafico_pulp_teorico_2n.png`: rango chico, tiempo medido vs. curva teórica c·2^n (eje y logarítmico).
-- `grafico_pulp_modelos.png`: rango grande, tiempo medido vs. ajustes c·n, c·n·log n y c·n² (log-log),
-  con la pendiente empírica k. La curva 2^n no se puede dibujar en este rango.
-- `grafico_pulp_construccion.png`: rango grande, construcción del modelo vs. resolución.
-- `grafico_pulp_dificiles.png`: extra, instancias de crear_mochila.py vs. instancias difíciles.
-
-`graficos.py` imprime en consola las constantes ajustadas, el R² y el error relativo de cada modelo.
-
-## Notas
-
-- generar_casos.py genera mochilas al azar: si se vuelve a ejecutar, se reemplazan
-  los sets de datos y los tiempos cambian. Para reproducir los resultados del informe,
-  usar los archivos que ya están en casos/ y ejecutar solo solucion.py y graficos.py.
-- Los tiempos dependen de la computadora: en otra máquina los valores van a ser
-  distintos, pero la forma de la curva debería mantenerse.
+Sin semilla, volver a ejecutar `generar_casos.py` reemplaza los sets de datos y cambian los tiempos.
